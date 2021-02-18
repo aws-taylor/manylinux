@@ -32,7 +32,16 @@ tar -xzf Python-${CPYTHON_VERSION}.tgz
 pushd Python-${CPYTHON_VERSION}
 PREFIX="/opt/_internal/cpython-${CPYTHON_VERSION}"
 mkdir -p ${PREFIX}/lib
-./configure --prefix=${PREFIX} --disable-shared --with-ensurepip=no > /dev/null
+./configure \
+  CFLAGS="-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security" \
+  CPPFLAGS="-D_FORTIFY_SOURCE=2" \
+  CXXFLAGS="-g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security" \
+  FFLAGS="-g -O2 -fstack-protector --param=ssp-buffer-size=4" \
+  GCJFLAGS="-g -O2 -fstack-protector --param=ssp-buffer-size=4" \
+  LDFLAGS="-Wl,-Bsymbolic-functions -Wl,-z,relro" \
+  --prefix=${PREFIX} \
+  --disable-shared \
+  --with-ensurepip=no > /dev/null
 make -j$(nproc) > /dev/null
 make -j$(nproc) install > /dev/null
 popd
